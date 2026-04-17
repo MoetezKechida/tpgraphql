@@ -1,0 +1,75 @@
+query MyQuery($id : Int) {
+  cv(id: $id) {
+    
+    ... CvInfo
+    ... on Cv{
+      age
+      job
+      skills{
+        ... CvInfoGeneral
+        ... on Skill{
+          designation
+        }
+      }
+      user{
+        ... CvInfo
+        ... on User{
+          email
+          role
+        }
+      }
+      }
+  
+  }
+}
+
+fragment CvInfoGeneral on InfosGeneral{
+  id
+}
+fragment CvInfo on Infos{
+  id
+  name
+}
+
+
+****** variables *******
+
+{
+  "id": 1
+}
+
+
+*****all cvs******
+
+query MyQuery {
+  cvs{
+    
+    ... CvInfo
+    ... on Cv{
+      age
+      job
+      skills{
+        ... CvInfoGeneral
+        ... on Skill{
+          designation
+        }
+      }
+      user{
+        ... CvInfo
+        ... on User{
+          email
+          role
+        }
+      }
+      }
+  
+  }
+}
+
+fragment CvInfoGeneral on InfosGeneral{
+  id
+}
+fragment CvInfo on Infos{
+  id
+  name
+}

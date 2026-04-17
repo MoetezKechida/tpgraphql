@@ -1,0 +1,37 @@
+interface InfosGeneral{
+    id: Int!
+}
+interface Infos{
+    id: Int!
+    name: String!
+}
+type Cv implements InfosGeneral & Infos {
+    id: Int!
+    name: String!
+    age: Int
+    job: String
+    skills: [Skill!]!
+    user: User!
+}
+type Skill implements InfosGeneral {
+    id: Int!
+    designation: String!
+    cvs: [Cv!]
+}
+type User implements InfosGeneral & Infos {
+    id: Int!
+    name: String!
+    email: String!
+    role: Role!
+    cv: [Cv!]
+}
+enum Role{
+    USER 
+    ADMIN
+}
+
+type Query{
+    cv(id: Int): Cv
+    cvs: [Cv]
+
+}
