@@ -12,6 +12,7 @@ type Cv implements InfosGeneral & Infos {
     job: String
     skills: [Skill!]!
     user: User!
+    deletedAt: String
 }
 type Skill implements InfosGeneral {
     id: Int!
@@ -29,9 +30,26 @@ enum Role{
     USER 
     ADMIN
 }
-
+input CreateCvInput {
+    name:   String!
+    age:    Int
+    job:    String
+    userId: Int!
+    skillIds: [Int!]!
+}
+input UpdateCvInput {
+    name:     String
+    age:      Int
+    job:      String
+    userId:   Int
+    skillIds: [Int!]
+}
 type Query{
     cv(id: Int): Cv
     cvs: [Cv]
-
+}
+type Mutation {
+    addCv(input: CreateCvInput!): Cv!
+    updateCv(id: Int!, input: UpdateCvInput!): Cv!
+    deleteCv(id: Int!): Cv!
 }

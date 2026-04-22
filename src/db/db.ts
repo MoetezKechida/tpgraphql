@@ -21,7 +21,7 @@ export const DB = {
             job:"Software Engineer",
             skills: [1, 2],
             user: 1,
-
+            deletedAt: null,
         },
         {
             id:3,
@@ -30,7 +30,7 @@ export const DB = {
             job:"Software Engineer",
             skills: [1, 3],
             user: 1,
-
+            deletedAt: null,
         },
         {
             id:2,
@@ -39,6 +39,7 @@ export const DB = {
             job:"Product Manager",
             skills: [2, 3],
             user: 2,
+            deletedAt: null,
         }
     ],
     

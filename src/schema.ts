@@ -1,5 +1,6 @@
 import{ createSchema} from"graphql-yoga";
 import { Query } from "./Resolvers/Query";
+import { Mutation } from "./Resolvers/Mutation";
 import { Infos } from "./Resolvers/Infos";
 import { InfosGeneral } from "./Resolvers/InfosGeneral";
 import { Cv } from "./Resolvers/Cv";
@@ -17,6 +18,7 @@ export const schema=createSchema({
     ),
     resolvers:{
         Query,
+        Mutation,
         Infos,
         Cv,
         InfosGeneral
