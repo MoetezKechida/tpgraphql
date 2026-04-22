@@ -4,6 +4,7 @@ import { Mutation } from "./Resolvers/Mutation";
 import { Infos } from "./Resolvers/Infos";
 import { InfosGeneral } from "./Resolvers/InfosGeneral";
 import { Cv } from "./Resolvers/Cv";
+import { User } from "./Resolvers/User";
 
 
 
@@ -21,6 +22,7 @@ export const schema=createSchema({
         Mutation,
         Infos,
         Cv,
-        InfosGeneral
+        InfosGeneral,
+        User,
     },
 });

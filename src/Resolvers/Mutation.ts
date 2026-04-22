@@ -1,91 +1,91 @@
 export const Mutation = {
-    addCv: (_: any, { input }: { input: any }, { db }: { db: any }) => {
-        const user = db.users.find((u: any) => u.id === input.userId);
+    addCv: async (_: any, { input }: { input: any }, { prisma }: { prisma: any }) => {
+        const user = await prisma.user.findUnique({ where: { id: input.userId } });
         if (!user) {
             throw new Error(`User with id ${input.userId} not found.`);
         }
 
-        for (const skillId of input.skillIds) {
-            const skill = db.skills.find((s: any) => s.id === skillId);
-            if (!skill) {
-                throw new Error(`Skill with id ${skillId} not found.`);
-            }
+        if (!Array.isArray(input.skillIds) || input.skillIds.length === 0) {
+            throw new Error("At least one skillId is required.");
         }
 
-        const newCv = {
-            id: db.cvs.length > 0
-                ? Math.max(...db.cvs.map((c: any) => c.id)) + 1
-                : 1,
-            name: input.name,
-            age: input.age ?? null,
-            job: input.job ?? null,
-            skills: input.skillIds,
-            user: input.userId,
-            deletedAt: null,
-        };
+        const skills = await prisma.skill.findMany({
+            where: { id: { in: input.skillIds } },
+            select: { id: true },
+        });
 
-        db.cvs.push(newCv);
+        if (skills.length !== input.skillIds.length) {
+            throw new Error("One or more skills were not found.");
+        }
 
-        user.cv = [...(user.cv ?? []), newCv.id];
-
-        return newCv;
+        return prisma.cv.create({
+            data: {
+                name: input.name,
+                age: input.age ?? null,
+                job: input.job ?? null,
+                userId: input.userId,
+                skills: {
+                    connect: input.skillIds.map((id: number) => ({ id })),
+                },
+            },
+        });
     },
-    updateCv: (_: any, { id, input }: { id: number; input: any }, { db }: { db: any }) => {
-        const cvIndex = db.cvs.findIndex((c: any) => c.id === id);
-        if (cvIndex === -1) {
+
+    updateCv: async (_: any, { id, input }: { id: number; input: any }, { prisma }: { prisma: any }) => {
+        const cv = await prisma.cv.findUnique({ where: { id } });
+        if (!cv) {
             throw new Error(`CV with id ${id} not found.`);
         }
-
-        const cv = db.cvs[cvIndex];
-        if (cv.deletedAt !== null && cv.deletedAt !== undefined) {
+        if (cv.deletedAt) {
             throw new Error(`CV with id ${id} has been deleted and cannot be updated.`);
         }
+
         if (input.userId !== undefined && input.userId !== null) {
-            const user = db.users.find((u: any) => u.id === input.userId);
+            const user = await prisma.user.findUnique({ where: { id: input.userId } });
             if (!user) {
                 throw new Error(`User with id ${input.userId} not found.`);
             }
         }
 
         if (input.skillIds !== undefined && input.skillIds !== null) {
-            for (const skillId of input.skillIds) {
-                const skill = db.skills.find((s: any) => s.id === skillId);
-                if (!skill) {
-                    throw new Error(`Skill with id ${skillId} not found.`);
-                }
+            const skills = await prisma.skill.findMany({
+                where: { id: { in: input.skillIds } },
+                select: { id: true },
+            });
+
+            if (skills.length !== input.skillIds.length) {
+                throw new Error("One or more skills were not found.");
             }
         }
 
-        const updatedCv = {
-            ...cv,
-            name: input.name ?? cv.name,
-            age: input.age !== undefined ? input.age : cv.age,
-            job: input.job !== undefined ? input.job : cv.job,
-            user: input.userId ?? cv.user,
-            skills: input.skillIds ?? cv.skills,
-        };
-
-        db.cvs[cvIndex] = updatedCv;
-        return updatedCv;
+        return prisma.cv.update({
+            where: { id },
+            data: {
+                name: input.name ?? undefined,
+                age: input.age !== undefined ? input.age : undefined,
+                job: input.job !== undefined ? input.job : undefined,
+                userId: input.userId ?? undefined,
+                skills: input.skillIds
+                    ? { set: input.skillIds.map((skillId: number) => ({ id: skillId })) }
+                    : undefined,
+            },
+        });
     },
 
-    deleteCv: (_: any, { id }: { id: number }, { db }: { db: any }) => {
-        const cvIndex = db.cvs.findIndex((c: any) => c.id === id);
-        if (cvIndex === -1) {
+    deleteCv: async (_: any, { id }: { id: number }, { prisma }: { prisma: any }) => {
+        const cv = await prisma.cv.findUnique({ where: { id } });
+
+        if (!cv) {
             throw new Error(`CV with id ${id} not found.`);
         }
-        const cv = db.cvs[cvIndex];
 
-        if (cv.deletedAt !== null && cv.deletedAt !== undefined) {
+        if (cv.deletedAt) {
             throw new Error(`CV with id ${id} is already deleted.`);
         }
 
-        const deletedCv = {
-            ...cv,
-            deletedAt: new Date().toISOString(),
-        };
-
-        db.cvs[cvIndex] = deletedCv;
-        return deletedCv;
+        return prisma.cv.update({
+            where: { id },
+            data: { deletedAt: new Date() },
+        });
     },
 };

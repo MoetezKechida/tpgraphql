@@ -1,7 +1,7 @@
 
 export const InfosGeneral = {
 __resolveType(obj) {
-        if(obj.age) {
+                if ("job" in obj || "age" in obj) {
             return "Cv"
         } else if (obj.designation) {
           return "Skill";
