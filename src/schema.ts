@@ -5,6 +5,7 @@ import { Infos } from "./Resolvers/Infos";
 import { InfosGeneral } from "./Resolvers/InfosGeneral";
 import { Cv } from "./Resolvers/Cv";
 import { User } from "./Resolvers/User";
+import { Subscription } from "./Resolvers/Subscription";
 
 
 
@@ -20,6 +21,7 @@ export const schema=createSchema({
     resolvers:{
         Query,
         Mutation,
+        Subscription,
         Infos,
         Cv,
         InfosGeneral,

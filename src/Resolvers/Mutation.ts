@@ -1,3 +1,5 @@
+import { pubsub } from "../pubsub";
+
 export const Mutation = {
     addCv: async (_: any, { input }: { input: any }, { prisma }: { prisma: any }) => {
         const user = await prisma.user.findUnique({ where: { id: input.userId } });
@@ -18,7 +20,7 @@ export const Mutation = {
             throw new Error("One or more skills were not found.");
         }
 
-        return prisma.cv.create({
+        const newCv = await prisma.cv.create({
             data: {
                 name: input.name,
                 age: input.age ?? null,
@@ -29,6 +31,8 @@ export const Mutation = {
                 },
             },
         });
+        pubsub.publish("CV_ADDED",  newCv );
+        return newCv;
     },
 
     updateCv: async (_: any, { id, input }: { id: number; input: any }, { prisma }: { prisma: any }) => {
@@ -58,7 +62,7 @@ export const Mutation = {
             }
         }
 
-        return prisma.cv.update({
+        const updatedCv = await prisma.cv.update({
             where: { id },
             data: {
                 name: input.name ?? undefined,
@@ -70,6 +74,8 @@ export const Mutation = {
                     : undefined,
             },
         });
+        pubsub.publish("CV_UPDATED", updatedCv);
+        return updatedCv;
     },
 
     deleteCv: async (_: any, { id }: { id: number }, { prisma }: { prisma: any }) => {
@@ -83,9 +89,11 @@ export const Mutation = {
             throw new Error(`CV with id ${id} is already deleted.`);
         }
 
-        return prisma.cv.update({
+        const deletedCv = await prisma.cv.update({
             where: { id },
             data: { deletedAt: new Date() },
         });
+        pubsub.publish("CV_DELETED", deletedCv);
+        return deletedCv;
     },
 };
