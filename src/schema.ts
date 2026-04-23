@@ -1,9 +1,10 @@
-import{ createSchema} from"graphql-yoga";
+import{ createSchema, createPubSub} from"graphql-yoga";
 import { Query } from "./Resolvers/Query";
 import { Mutation } from "./Resolvers/Mutation";
 import { Infos } from "./Resolvers/Infos";
 import { InfosGeneral } from "./Resolvers/InfosGeneral";
 import { Cv } from "./Resolvers/Cv";
+import { Subscription } from "./Resolvers/Subscription";
 
 
 
@@ -11,6 +12,7 @@ import { Cv } from "./Resolvers/Cv";
 
 const fs=require("fs");
 const path=require("path");
+export const pubSub = createPubSub();
 export const schema=createSchema({
     typeDefs:fs.readFileSync(
         path.join(__dirname, "./../schema/schema.graphql"),
@@ -21,6 +23,7 @@ export const schema=createSchema({
         Mutation,
         Infos,
         Cv,
-        InfosGeneral
+        InfosGeneral,
+        Subscription
     },
 });

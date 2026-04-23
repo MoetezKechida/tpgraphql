@@ -1,3 +1,5 @@
+import { pubSub } from "../schema";
+
 export const Mutation = {
     addCv: (_: any, { input }: { input: any }, { db }: { db: any }) => {
         const user = db.users.find((u: any) => u.id === input.userId);
@@ -28,6 +30,7 @@ export const Mutation = {
 
         user.cv = [...(user.cv ?? []), newCv.id];
 
+        pubSub.publish("cv", { cv:{ mutation: "CREATED", cv: newCv } });
         return newCv;
     },
     updateCv: (_: any, { id, input }: { id: number; input: any }, { db }: { db: any }) => {
@@ -66,6 +69,7 @@ export const Mutation = {
         };
 
         db.cvs[cvIndex] = updatedCv;
+        pubSub.publish("cv", { cv: { mutation: "UPDATED", cv: updatedCv } });
         return updatedCv;
     },
 
@@ -86,6 +90,7 @@ export const Mutation = {
         };
 
         db.cvs[cvIndex] = deletedCv;
+        pubSub.publish("cv", { cv: { mutation: "DELETED", cv: deletedCv } });
         return deletedCv;
     },
 };

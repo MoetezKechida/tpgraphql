@@ -53,3 +53,15 @@ type Mutation {
     updateCv(id: Int!, input: UpdateCvInput!): Cv!
     deleteCv(id: Int!): Cv!
 }
+type Subscription {
+   cv : SubscriptionPayload!
+}
+type SubscriptionPayload {
+    mutation: MutationType!
+    cv: Cv!
+}
+enum MutationType {
+    CREATED
+    UPDATED
+    DELETED
+}
