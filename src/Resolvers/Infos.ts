@@ -1,9 +1,9 @@
-export const Infos={
-__resolveType(obj) {
-        if(obj.job) {
-            return "Cv"
-        } else {
-          return "User"
-        } 
+export const Infos = {
+  __resolveType(obj: any) {
+    if ("age" in obj) {
+      return "Cv";
+    } else {
+      return "User";
     }
-}
+  },
+};
