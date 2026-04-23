@@ -6,9 +6,9 @@ import { PubSubEvents } from "./types";
 
 const pubSub = createPubSub<PubSubEvents>();
 
-const yoga = createYoga({ 
-  schema, 
-  context: { db: DB, pubSub } 
+const yoga = createYoga({
+  schema,
+  context: { db: DB, pubSub }
 });
 
 const server = createServer(yoga);

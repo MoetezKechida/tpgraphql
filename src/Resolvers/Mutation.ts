@@ -4,13 +4,13 @@ export const Mutation = {
   addCv: (_: unknown, { input }: { input: CreateCvInput }, { db, pubSub }: GraphQLContext): CvRecord => {
     const user = db.users.find((u) => u.id === input.userId);
     if (!user) {
-      throw new Error(`User with id ${input.userId} not found.`);
+      throw new Error("User not found");
     }
 
     for (const skillId of input.skillIds) {
       const skill = db.skills.find((s) => s.id === skillId);
       if (!skill) {
-        throw new Error(`Skill with id ${skillId} not found.`);
+        throw new Error("One or more skills not found");
       }
     }
 
@@ -40,18 +40,18 @@ export const Mutation = {
   updateCv: (_: unknown, { id, input }: { id: number; input: UpdateCvInput }, { db, pubSub }: GraphQLContext): CvRecord => {
     const cvIndex = db.cvs.findIndex((c) => c.id === id);
     if (cvIndex === -1) {
-      throw new Error(`CV with id ${id} not found.`);
+      throw new Error("CV not found");
     }
 
     const cv = db.cvs[cvIndex];
     if (cv.deletedAt !== null) {
-      throw new Error(`CV with id ${id} has been deleted and cannot be updated.`);
+      throw new Error("Cannot update a deleted CV");
     }
 
     if (input.userId !== undefined && input.userId !== null && input.userId !== cv.user) {
       const newUser = db.users.find((u) => u.id === input.userId);
       if (!newUser) {
-        throw new Error(`User with id ${input.userId} not found.`);
+        throw new Error("User not found");
       }
       
       // Remove from old user
@@ -68,7 +68,7 @@ export const Mutation = {
       for (const skillId of input.skillIds) {
         const skill = db.skills.find((s) => s.id === skillId);
         if (!skill) {
-          throw new Error(`Skill with id ${skillId} not found.`);
+          throw new Error("One or more skills not found");
         }
       }
     }
@@ -92,12 +92,12 @@ export const Mutation = {
   deleteCv: (_: unknown, { id }: { id: number }, { db, pubSub }: GraphQLContext): CvRecord => {
     const cvIndex = db.cvs.findIndex((c) => c.id === id);
     if (cvIndex === -1) {
-      throw new Error(`CV with id ${id} not found.`);
+      throw new Error("CV not found");
     }
     const cv = db.cvs[cvIndex];
 
     if (cv.deletedAt !== null) {
-      throw new Error(`CV with id ${id} is already deleted.`);
+      throw new Error("CV already deleted");
     }
 
     const deletedCv: CvRecord = {
