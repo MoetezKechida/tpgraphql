@@ -5,10 +5,12 @@ import { Subscription } from "./Resolvers/Subscription";
 import { Infos } from "./Resolvers/Infos";
 import { InfosGeneral } from "./Resolvers/InfosGeneral";
 import { Cv } from "./Resolvers/Cv";
+import { User } from "./Resolvers/User";
+import { Skill } from "./Resolvers/Skill";
 import fs from "fs";
 import path from "path";
 
-export const schema = createSchema({
+export const schema: any = createSchema({
   typeDefs: fs.readFileSync(
     path.join(__dirname, "./../schema/schema.graphql"),
     "utf-8"
@@ -19,6 +21,8 @@ export const schema = createSchema({
     Subscription,
     Infos,
     Cv,
+    User,
+    Skill,
     InfosGeneral,
   },
 });
