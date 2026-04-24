@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  name  String
+  email String @unique
+  role  Role
+  cvs   Cv[]
+}
+
+model Skill {
+  id          Int    @id @default(autoincrement())
+  designation  String
+  cvs          CvSkill[]
+}
+
+model Cv {
+  id        Int       @id @default(autoincrement())
+  name      String
+  age       Int?
+  job       String?
+  deletedAt DateTime?
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  skills    CvSkill[]
+}
+
+model CvSkill {
+  cvId    Int
+  skillId Int
+  cv      Cv    @relation(fields: [cvId], references: [id])
+  skill   Skill @relation(fields: [skillId], references: [id])
+
+  @@id([cvId, skillId])
+}

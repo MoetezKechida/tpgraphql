@@ -5,24 +5,23 @@ import {
   CvRecord,
   MutationType,
 } from "../types";
+import {
+  getNextCvId,
+  linkCvToUser,
+  moveCvToUser,
+  publishCvEvent,
+  requireActiveCv,
+  requireSkills,
+  requireUser,
+  unlinkCvFromUser,
+} from "../services/cvService";
 
 export const Mutation = {
   addCv: (_: unknown, { input }: { input: CreateCvInput }, { db, pubSub }: GraphQLContext): CvRecord => {
-    const user = db.users.find((u) => u.id === input.userId);
-    if (!user) {
-      throw new Error("User not found");
-    }
+    const user = requireUser(db, input.userId);
+    requireSkills(db, input.skillIds);
 
-    for (const skillId of input.skillIds) {
-      const skill = db.skills.find((s) => s.id === skillId);
-      if (!skill) {
-        throw new Error("One or more skills not found");
-      }
-    }
-
-    const nextCvId = db.cvs.length > 0 
-      ? Math.max(...db.cvs.map((c) => c.id)) + 1 
-      : 1;
+    const nextCvId = getNextCvId(db);
 
     const newCv: CvRecord = {
       id: nextCvId,
@@ -36,47 +35,22 @@ export const Mutation = {
 
     db.cvs.push(newCv);
 
-    user.cv = [...(user.cv ?? []), newCv.id];
+    linkCvToUser(user, newCv.id);
 
-    pubSub.publish("cv", { mutation: MutationType.CREATED, cv: newCv });
+    publishCvEvent(pubSub, MutationType.CREATED, newCv);
 
     return newCv;
   },
 
   updateCv: (_: unknown, { id, input }: { id: number; input: UpdateCvInput }, { db, pubSub }: GraphQLContext): CvRecord => {
-    const cvIndex = db.cvs.findIndex((c) => c.id === id);
-    if (cvIndex === -1) {
-      throw new Error("CV not found");
-    }
-
-    const cv = db.cvs[cvIndex];
-    if (cv.deletedAt !== null) {
-      throw new Error("Cannot update a deleted CV");
-    }
+    const { cv, cvIndex } = requireActiveCv(db, id, "Cannot update a deleted CV");
 
     if (input.userId !== undefined && input.userId !== null && input.userId !== cv.user) {
-      const newUser = db.users.find((u) => u.id === input.userId);
-      if (!newUser) {
-        throw new Error("User not found");
-      }
-      
-      // Remove from old user
-      const oldUser = db.users.find((u) => u.id === cv.user);
-      if (oldUser) {
-        oldUser.cv = (oldUser.cv || []).filter((cvId) => cvId !== id);
-      }
-      
-      // Add to new user
-      newUser.cv = [...(newUser.cv ?? []), id];
+      moveCvToUser(db, id, cv.user, input.userId);
     }
 
     if (input.skillIds !== undefined && input.skillIds !== null) {
-      for (const skillId of input.skillIds) {
-        const skill = db.skills.find((s) => s.id === skillId);
-        if (!skill) {
-          throw new Error("One or more skills not found");
-        }
-      }
+      requireSkills(db, input.skillIds);
     }
 
     const updatedCv: CvRecord = {
@@ -90,31 +64,25 @@ export const Mutation = {
 
     db.cvs[cvIndex] = updatedCv;
 
-    pubSub.publish("cv", { mutation: MutationType.UPDATED, cv: updatedCv });
+    publishCvEvent(pubSub, MutationType.UPDATED, updatedCv);
 
     return updatedCv;
   },
 
   deleteCv: (_: unknown, { id }: { id: number }, { db, pubSub }: GraphQLContext): CvRecord => {
-    const cvIndex = db.cvs.findIndex((c) => c.id === id);
-    if (cvIndex === -1) {
-      throw new Error("CV not found");
-    }
-    const cv = db.cvs[cvIndex];
-
-    if (cv.deletedAt !== null) {
-      throw new Error("CV already deleted");
-    }
+    const { cv, cvIndex } = requireActiveCv(db, id, "CV already deleted");
 
     const deletedCv: CvRecord = {
       ...cv,
       deletedAt: new Date().toISOString(),
     };
 
+    unlinkCvFromUser(db.users.find((entry) => entry.id === cv.user), id);
+
     db.cvs[cvIndex] = deletedCv;
 
-    pubSub.publish("cv", { mutation: MutationType.DELETED, cv: deletedCv });
+    publishCvEvent(pubSub, MutationType.DELETED, deletedCv);
 
     return deletedCv;
-    },
+  },
 };
