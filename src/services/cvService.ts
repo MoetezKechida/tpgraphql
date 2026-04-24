@@ -99,3 +99,13 @@ export function resolveCvSkills(db: Database, skillIds: number[]): Skill[] {
 export function resolveCvUser(db: Database, userId: number): User | undefined {
   return db.users.find((entry) => entry.id === userId);
 }
+
+export function resolveUserCvs(db: Database, cvIds: number[]): CvRecord[] {
+  return cvIds
+    .map((cvId) => getCvById(db, cvId))
+    .filter((cv): cv is CvRecord => cv !== null);
+}
+
+export function resolveSkillCvs(db: Database, skillId: number): CvRecord[] {
+  return getActiveCvs(db).filter((cv) => cv.skills.includes(skillId));
+}

@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Query } from "../src/Resolvers/Query";
 import { Mutation } from "../src/Resolvers/Mutation";
 import { Cv } from "../src/Resolvers/Cv";
+import { User } from "../src/Resolvers/User";
+import { Skill } from "../src/Resolvers/Skill";
 import { DB } from "../src/db/db";
 import { MutationType, type GraphQLContext } from "../src/types";
 
@@ -89,5 +91,19 @@ describe("CV resolvers", () => {
 
     expect(Cv.skills(cv, null, context)).toHaveLength(2);
     expect(Cv.user(cv, null, context)?.email).toBe("john.doe@example.com");
+  });
+
+  it("resolves user cvs", () => {
+    const user = context.db.users.find((entry) => entry.id === 1)!;
+    const result = User.cv(user, null, context);
+
+    expect(result.map((entry) => entry.id).sort()).toEqual([1, 3]);
+  });
+
+  it("resolves skill cvs", () => {
+    const skill = context.db.skills.find((entry) => entry.id === 2)!;
+    const result = Skill.cvs(skill, null, context);
+
+    expect(result.map((entry) => entry.id).sort()).toEqual([1, 2]);
   });
 });

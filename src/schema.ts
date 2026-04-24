@@ -5,6 +5,8 @@ import { Subscription } from "./Resolvers/Subscription";
 import { Infos } from "./Resolvers/Infos";
 import { InfosGeneral } from "./Resolvers/InfosGeneral";
 import { Cv } from "./Resolvers/Cv";
+import { User } from "./Resolvers/User";
+import { Skill } from "./Resolvers/Skill";
 import fs from "fs";
 import path from "path";
 
@@ -19,6 +21,8 @@ export const schema: any = createSchema({
     Subscription,
     Infos,
     Cv,
+    User,
+    Skill,
     InfosGeneral,
   },
 });
