@@ -2,12 +2,12 @@ import { createServer } from "node:http";
 import { createYoga, createPubSub } from "graphql-yoga";
 import { schema } from "./schema";
 import { DB } from "./db/db";
-import { PubSubEvents } from "./types";
+import { GraphQLContext, PubSubEvents } from "./types";
 
 const pubSub = createPubSub<PubSubEvents>();
 
-const yoga = createYoga({
-  schema,
+const yoga = createYoga<{}, GraphQLContext>({
+  schema: schema as any,
   context: { db: DB, pubSub }
 });
 

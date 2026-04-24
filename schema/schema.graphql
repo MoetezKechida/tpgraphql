@@ -55,7 +55,14 @@ type Mutation {
 }
 
 type Subscription {
-    cvAdded: Cv!
-    cvUpdated: Cv!
-    cvDeleted: Cv!
+    cv: SubscriptionPayload!
+}
+type SubscriptionPayload {
+    mutation: MutationType!
+    cv: Cv!
+}
+enum MutationType {
+    CREATED
+    UPDATED
+    DELETED
 }

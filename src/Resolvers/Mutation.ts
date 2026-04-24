@@ -1,4 +1,10 @@
-import { GraphQLContext, CreateCvInput, UpdateCvInput, CvRecord } from "../types";
+import {
+  GraphQLContext,
+  CreateCvInput,
+  UpdateCvInput,
+  CvRecord,
+  MutationType,
+} from "../types";
 
 export const Mutation = {
   addCv: (_: unknown, { input }: { input: CreateCvInput }, { db, pubSub }: GraphQLContext): CvRecord => {
@@ -32,7 +38,7 @@ export const Mutation = {
 
     user.cv = [...(user.cv ?? []), newCv.id];
 
-    pubSub.publish("cvAdded", newCv);
+    pubSub.publish("cv", { mutation: MutationType.CREATED, cv: newCv });
 
     return newCv;
   },
@@ -84,7 +90,7 @@ export const Mutation = {
 
     db.cvs[cvIndex] = updatedCv;
 
-    pubSub.publish("cvUpdated", updatedCv);
+    pubSub.publish("cv", { mutation: MutationType.UPDATED, cv: updatedCv });
 
     return updatedCv;
   },
@@ -107,8 +113,8 @@ export const Mutation = {
 
     db.cvs[cvIndex] = deletedCv;
 
-    pubSub.publish("cvDeleted", deletedCv);
+    pubSub.publish("cv", { mutation: MutationType.DELETED, cv: deletedCv });
 
     return deletedCv;
-  },
+    },
 };

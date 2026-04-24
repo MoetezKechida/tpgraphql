@@ -34,10 +34,19 @@ export interface Database {
 
 import { PubSub } from "graphql-yoga";
 
+export enum MutationType {
+  CREATED = "CREATED",
+  UPDATED = "UPDATED",
+  DELETED = "DELETED",
+}
+
+export interface SubscriptionPayload {
+  mutation: MutationType;
+  cv: CvRecord;
+}
+
 export type PubSubEvents = {
-  cvAdded: [CvRecord];
-  cvUpdated: [CvRecord];
-  cvDeleted: [CvRecord];
+  cv: [SubscriptionPayload];
 };
 
 export interface GraphQLContext {
